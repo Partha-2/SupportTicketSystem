@@ -16,6 +16,15 @@ services:
       - key: GEMINI_API_KEY
         sync: false
 
+  - type: web
+    name: supportflow-frontend
+    runtime: docker
+    dockerfilePath: ./frontend/Dockerfile
+    dockerContext: ./frontend
+    envVars:
+      - key: VITE_API_URL
+        value: https://supportflow-backend.onrender.com
+
 databases:
   - name: supportflow-db
     databaseName: supportflow
