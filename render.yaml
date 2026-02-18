@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: supportflow-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    envVars:
+      - key: DEBUG
+        value: "False"
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: supportflow-db
+          property: connectionString
+      - key: GEMINI_API_KEY
+        sync: false
+
+databases:
+  - name: supportflow-db
+    databaseName: supportflow
+    user: supportflow
+    plan: free
