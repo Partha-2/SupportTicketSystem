@@ -42,7 +42,7 @@ ROOT_URLCONF = 'ticket_system.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'staticfiles' / 'frontend'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -89,6 +89,10 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_DIRS = [
+    BASE_DIR / 'staticfiles' / 'frontend',
+]
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOW_ALL_ORIGINS = True

@@ -1,21 +1,12 @@
 from django.contrib import admin
 from django.urls import path, include
+from django.views.generic import TemplateView
 from django.http import JsonResponse
-from django.views.static import serve
-from django.conf import settings
+from django.views.decorators.cache import cache_page
 import os
+from django.conf import settings
 
-def root_view(request):
-    # Serve React app's index.html for frontend SPA
-    frontend_path = os.path.join(settings.STATIC_ROOT, 'frontend', 'index.html')
-    if os.path.exists(frontend_path):
-        with open(frontend_path, 'r') as f:
-            return JsonResponse({
-                'redirect': '/',
-                'message': 'Frontend is available'
-            })
-    
-    # Fallback API info
+def api_info(request):
     return JsonResponse({
         'message': 'Support Ticket System API',
         'endpoints': {
@@ -24,14 +15,20 @@ def root_view(request):
         }
     })
 
+class IndexView(TemplateView):
+    template_name = 'index.html'
+    
+    def get_template_names(self):
+        frontend_path = os.path.join(settings.STATIC_ROOT, 'frontend', 'index.html')
+        if os.path.exists(frontend_path):
+            # Return the absolute path to the frontend index.html
+            return [frontend_path]
+        return ['index.html']
+
 urlpatterns = [
-    path('', root_view),
+    path('api/info/', api_info),
     path('admin/', admin.site.urls),
     path('api/tickets/', include('tickets.urls')),
+    # Catch-all for React SPA - must be last
+    path('', IndexView.as_view(), name='index'),
 ]
-
-# Serve frontend static files (React build)
-if settings.DEBUG is False:
-    urlpatterns += [
-        path('', serve, {'document_root': os.path.join(settings.STATIC_ROOT, 'frontend'), 'path': 'index.html'}),
-    ]
