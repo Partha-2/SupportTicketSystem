@@ -1,10 +1,9 @@
 from django.contrib import admin
 from django.urls import path, include
-from django.views.generic import TemplateView
-from django.http import JsonResponse
-from django.views.decorators.cache import cache_page
-import os
+
+from django.http import JsonResponse, FileResponse, Http404
 from django.conf import settings
+import os
 
 def api_info(request):
     return JsonResponse({
@@ -15,20 +14,21 @@ def api_info(request):
         }
     })
 
-class IndexView(TemplateView):
-    template_name = 'index.html'
-    
-    def get_template_names(self):
-        frontend_path = os.path.join(settings.STATIC_ROOT, 'frontend', 'index.html')
-        if os.path.exists(frontend_path):
-            # Return the absolute path to the frontend index.html
-            return [frontend_path]
-        return ['index.html']
+def serve_react(request):
+    """Serve the React app's index.html for all non-API, non-admin routes."""
+    index_path = os.path.join(settings.STATIC_ROOT, 'frontend', 'index.html')
+    if os.path.exists(index_path):
+        return FileResponse(open(index_path, 'rb'), content_type='text/html')
+    raise Http404()
 
 urlpatterns = [
     path('api/info/', api_info),
     path('admin/', admin.site.urls),
     path('api/tickets/', include('tickets.urls')),
-    # Catch-all for React SPA - must be last
-    path('', IndexView.as_view(), name='index'),
+]
+
+# Catch-all for React SPA (must be last)
+from django.urls import re_path
+urlpatterns += [
+    re_path(r'^(?!api/|admin/).*$', serve_react),
 ]
